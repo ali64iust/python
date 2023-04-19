@@ -1,0 +1,8 @@
+pip install -U pyinstaller
+
+
+https://pypi.org/project/auto-py-to-exe/#description
+$ pip install auto-py-to-exe
+auto-py-to-exe
+
+Usage: auto-py-to-exe [-nc] [-c [CONFIG]] [-o [PATH]] [filename]
