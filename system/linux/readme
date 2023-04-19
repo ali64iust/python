@@ -1,0 +1,46 @@
+https://medium.com/codex/setup-a-python-script-as-a-service-through-systemctl-systemd-f0cc55a42267/etc/systemd/system/
+
+
+
+sudo apt-get install -y systemd
+
+sudo nano test.py
+{
+import time
+from datetime import datetime
+while True:
+    with open("timestamp.txt", "a") as f:
+        f.write("The current timestamp is: " + str(datetime.now()))
+        f.close()
+    time.sleep(10)
+}
+
+sudo nano /etc/systemd/system/test.service (name of the service which is test in this case)
+{
+[Unit]
+Description=My test service
+After=multi-user.target
+[Service]
+Type=simple
+Restart=always
+ExecStart=/usr/bin/python3 /home/<username>/test.py
+[Install]
+WantedBy=multi-user.target
+}
+
+sudo systemctl daemon-reload
+
+sudo systemctl enable test.service
+sudo systemctl start test.service
+
+
+
+Note: The file will be written in the root directory (/) because the program will write in the path from the perspective of systemd. To change that simply edit out the file path. For example:
+import time
+from datetime import datetime
+path_to_file = "enter the desired path of the file"
+while True:
+    with open(path_to_file, "a") as f:
+        f.write("The current timestamp is: " + str(datetime.now()))
+        f.close()
+    time.sleep(10)
