@@ -1,5 +1,3 @@
-#not completed yet
-
 import selenium
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -19,16 +17,19 @@ def Mbox(title, text, style):
 #pip install selenium
 #pip install requests
 
+
 class IranSedaDownloader():
     IranSedaURL="http://kids.iranseda.ir/?VALID=TRUE"
     tabHandle=0
-
+    DownloadedURL=[]
+    DownloadedURLPath=os.getcwd()+"\\DownloadedURL.txt"
     def __init__(self):
         self.driver = webdriver.Firefox()
         self.action = ActionChains(self.driver)
-
+        self.ReadDownloadedURL()
 
     def SaveImageAs(self,image1,FullPathToSave):
+        """
         self.action.move_to_element(image1).context_click().perform()
         pyautogui.hotkey('command', 'v')
         time.sleep(2)
@@ -37,7 +38,11 @@ class IranSedaDownloader():
         time.sleep(2)
         pyautogui.press('enter')
         time.sleep(2)
-
+        """
+        if os.path.exists(FullPathToSave):
+            os.remove(FullPathToSave)
+        time.sleep(0.01)
+        image1.screenshot(FullPathToSave)
 
         pass
 
@@ -47,13 +52,22 @@ class IranSedaDownloader():
             os.mkdir(path1 )
 
     def GetDetailsprogramNewTab(self,url,WorkingPath):
+        if self.CheckURLDownloaded(url):
+            print("url downloaded before:" + url)
+            return
+
+
+
         print("fetch: " + url)
+
         self.OpenNewTab(url)
         body_module = self.driver.find_element(By.CLASS_NAME, "button-list")
         doanload = body_module.find_elements(By.TAG_NAME, "a")[-1]
         downloadURL=doanload.get_attribute("href")
 
         content1 = self.driver.find_element(By.ID, "tags")
+
+        content1.screenshot(WorkingPath+"content.png")
 
         fc=codecs.open(WorkingPath+"content.txt","w",encoding="utf-8")
         fc.write(content1.text)
@@ -66,6 +80,9 @@ class IranSedaDownloader():
                 f.write(chunk)
 
         print("fetch completeg: " + url)
+
+        self.WriteURLToFile(url)
+
         self.CloseTab() #current page
         #time.sleep(1)
         #Mbox('baste shod?', 'baste shod?????', 1)
@@ -85,7 +102,7 @@ class IranSedaDownloader():
             self.makeDirecory(WorkingPath + str(pageNumber))
 
             image1 = images[images_index]
-            self.SaveImageAs(image1, WorkingPath + str(pageNumber) + "\\" + str(pageNumber) + ".jpg")
+            self.SaveImageAs(image1, WorkingPath + str(pageNumber) + "\\" + str(pageNumber) + ".png")
 
             self.GetDetailsprogramNewTab(newtab, WorkingPath + str(pageNumber) + "\\")
 
@@ -147,7 +164,8 @@ class IranSedaDownloader():
             self.makeDirecory(currentPath+str(pageNumber))
 
             image1 = page.find_element(By.TAG_NAME,"img")
-            self.SaveImageAs(image1,currentPath+str(pageNumber)+"\\"+str(pageNumber)+".jpg")
+
+            self.SaveImageAs(image1,currentPath+str(pageNumber)+"\\"+str(pageNumber)+".png")
 
             self.GetBarnamehayeKodakNewTab(newtab,currentPath+str(pageNumber)+"\\")
             pageNumber = pageNumber+1
@@ -158,6 +176,27 @@ class IranSedaDownloader():
         self.Get_BarnamehayeKodak()
 
         #self.driver.close()
+
+    def CheckURLDownloaded(self, url):
+        if(url+"\r\n" in self.DownloadedURL):
+            return True
+        return False
+
+    def WriteURLToFile(self,url):
+        print("URL save to file:" + url)
+
+        fc = codecs.open(self.DownloadedURLPath, "a", encoding="utf-8")
+        fc.write(url + "\r\n")
+        # fc.writelines(url)
+        fc.close()
+
+    def ReadDownloadedURL(self):
+        if(os.path.exists(self.DownloadedURLPath)):
+            print("path exist:"+self.DownloadedURLPath)
+            fc = codecs.open(self.DownloadedURLPath, "r", encoding="utf-8")
+            self.DownloadedURL=fc.readlines()
+            print(self.DownloadedURL)
+            fc.close()
 
 
 isd=IranSedaDownloader()
